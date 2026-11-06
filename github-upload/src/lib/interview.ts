@@ -1,0 +1,15 @@
+import {extractSkills} from './scoring';
+
+export type InterviewQuestion={id:string;category:string;question:string;reason:string;hint:string};
+export function buildInterviewQuestions(cv:string,job=''):InterviewQuestion[]{
+  if(cv.trim().length<30)return [];
+  const skills=extractSkills(cv),required=extractSkills(job);
+  const questions:InterviewQuestion[]=[{id:'intro',category:'Tanışlıq',question:'Özünüzü qısa təqdim edin. CV-nizdəki hansı təcrübə və ya bacarığı bu iş üçün ən uyğun hesab edirsiniz?',reason:'CV əsasında ilkin tanışlıq.',hint:'Hazırkı istiqamətiniz, bir konkret nümunə və karyera hədəfiniz haqqında danışın.'}];
+  const prioritized=[...skills.filter(s=>required.includes(s)),...skills.filter(s=>!required.includes(s))];
+  for(const skill of prioritized.slice(0,3))questions.push({id:`skill-${skill}`,category:'Bacarıq',question:`CV-nizdə ${skill} qeyd edilib. Bu bacarıqdan istifadə etdiyiniz bir işi izah edin: sizin rolunuz nə idi və nəticəni necə yoxladınız?`,reason:`CV-də tanınan bacarıq: ${skill}${required.includes(skill)?' — vakansiyada da tələb olunur.':'.'}`,hint:'Yalnız gördüyünüz işi danışın: vəziyyət, tapşırıq, etdiyiniz addımlar və nəticə.'});
+  if(/layihə|project|portfolio|təcrübə|experience|internship/i.test(cv))questions.push({id:'experience',category:'Təcrübə',question:'CV-nizdə qeyd etdiyiniz layihə və ya təcrübələrdən birini seçin. Ən çətin problem nə idi və onu necə həll etdiniz?',reason:'CV-də layihə və ya təcrübə ilə bağlı məlumat var.',hint:'Komandanın ümumi işindən əlavə öz töhfənizi və öyrəndiyiniz dərsi açıqlayın.'});
+  if(/təhsil|education|universitet|university|bakalavr|bachelor/i.test(cv))questions.push({id:'education',category:'Təhsil',question:'Təhsilinizdə öyrəndiyiniz hansı biliyi praktik bir tapşırıqda tətbiq etmisiniz?',reason:'CV-də təhsil məlumatı var.',hint:'Bir dərs və ya mövzu seçin, onu necə tətbiq etdiyinizi konkret nümunə ilə göstərin.'});
+  for(const skill of required.filter(s=>!skills.includes(s)).slice(0,2))questions.push({id:`gap-${skill}`,category:'Vakansiya tələbi',question:`Vakansiyada ${skill} tələb olunur, CV mətninizdə isə bu bacarıq görünmür. Bu sahədə təcrübəniz varmı? Yoxdursa, onu necə öyrənməyi planlaşdırırsınız?`,reason:'Vakansiya ilə CV arasında dəqiqləşdirilməli məqam.',hint:'Təcrübəniz varsa nümunə verin; yoxdursa bunu açıq deyib real öyrənmə planınızı paylaşın.'});
+  questions.push({id:'team',category:'Komanda işi',question:'Komandada fikir ayrılığı yaşadığınız bir vəziyyəti necə idarə etmisiniz? İş təcrübəniz yoxdursa, təhsil və ya komanda layihəsindən nümunə verə bilərsiniz.',reason:'Ünsiyyət və əməkdaşlıq üzrə ümumi HR sualı.',hint:'Vəziyyəti, dinləmə və razılaşma üsulunuzu, nəticəni izah edin.'},{id:'motivation',category:'Motivasiya',question:job.trim()?'Bu vakansiyada sizi nə cəlb edir və ilk aylarda komandaya necə töhfə vermək istərdiniz?':'Növbəti işinizdə nə öyrənmək və hansı məsuliyyətləri götürmək istəyirsiniz?',reason:'Karyera hədəfləri üzrə ümumi HR sualı.',hint:'Maraq göstərdiyiniz işi bacarıqlarınız və inkişaf məqsədlərinizlə əlaqələndirin.'});
+  return questions;
+}
